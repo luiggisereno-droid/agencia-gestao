@@ -1,4 +1,4 @@
-{
+ {
   "name": "agencia-gestao",
   "private": true,
   "version": "1.0.0",
@@ -9,11 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "dependencies": {
-  "firebase": "^11.7.1",
-  "react": "^18.2.0",
-  "react-dom": "^18.2.0"
-},
+    "firebase": "^11.7.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
