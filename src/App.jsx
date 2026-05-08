@@ -1,4 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+import { db } from "./firebase";
+
+import {
+  collection,
+  addDoc,
+  getDocs,
+  updateDoc,
+  doc
+} from "firebase/firestore";
 
 const CONSULTORAS = [
   { id: 1, nome: "Bruna", cor: "#6EE7B7" },
@@ -7,13 +17,23 @@ const CONSULTORAS = [
   { id: 4, nome: "Julia", cor: "#FCD34D" },
 ];
 
-const CLIENTES = {
-  1: ["Bradisfer", "Clássic Tintas", "Tubets", "Ritmus Ballet", "Jr Equipamentos"],
-  2: ["Barto Equipamentos", "Braslumi", "Ms Distribuidora", "Cambero", "PJ Atacadista", "Caio Guarujá"],
-  3: ["Multilitoral", "Silvina", "Mendes", "DP Marketplace", "Lojas Mami", "Outlet das Tintas"],
-  4: ["Projeto Rio Preto", "Evo", "Pytech", "Terramar", "Ah Distribuidora", "Freire Distribuidora"],
-};
+const [clientes, setClientes] = useState([]);
+useEffect(() => {
+  carregarClientes();
+}, []);
 
+async function carregarClientes() {
+  const querySnapshot = await getDocs(
+    collection(db, "clientes")
+  );
+
+  const lista = querySnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data()
+  }));
+
+  setClientes(lista);
+}
 const CHECKLIST_ITENS = [
   { id: "anuncios", label: "Anúncios", icon: "📢" },
   { id: "ads", label: "Ads", icon: "🎯" },
