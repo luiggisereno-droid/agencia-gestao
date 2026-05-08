@@ -3,11 +3,11 @@ import { useState, useEffect } from "react";
 import { db } from "./firebase";
 
 import {
-  collection,
-  addDoc,
-  getDocs,
-  updateDoc,
-  doc
+collection,
+addDoc,
+getDocs,
+updateDoc,
+doc
 } from "firebase/firestore";
 
 const CONSULTORAS = [
