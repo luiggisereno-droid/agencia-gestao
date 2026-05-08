@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
-
 import { db } from "./firebase";
-
 import {
-collection,
-addDoc,
-getDocs,
-updateDoc,
-doc
+  collection,
+  addDoc,
+  getDocs,
+  updateDoc,
+  doc
 } from "firebase/firestore";
 
 const CONSULTORAS = [
@@ -17,23 +15,14 @@ const CONSULTORAS = [
   { id: 4, nome: "Julia", cor: "#FCD34D" },
 ];
 
-const [clientes, setClientes] = useState([]);
-useEffect(() => {
-  carregarClientes();
-}, []);
+// ✅ DEFINA AQUI OS CLIENTES DE CADA CONSULTORA
+const CLIENTES = {
+  1: ["Cliente A", "Cliente B", "Cliente C"],
+  2: ["Cliente D", "Cliente E", "Cliente F"],
+  3: ["Cliente G", "Cliente H", "Cliente I"],
+  4: ["Cliente J", "Cliente K", "Cliente L"],
+};
 
-async function carregarClientes() {
-  const querySnapshot = await getDocs(
-    collection(db, "clientes")
-  );
-
-  const lista = querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data()
-  }));
-
-  setClientes(lista);
-}
 const CHECKLIST_ITENS = [
   { id: "anuncios", label: "Anúncios", icon: "📢" },
   { id: "ads", label: "Ads", icon: "🎯" },
@@ -83,6 +72,20 @@ export default function App() {
   const [duvidas, setDuvidas] = useState(Object.fromEntries(CONSULTORAS.map((c) => [c.id, []])));
   const [novaDuvida, setNovaDuvida] = useState(Object.fromEntries(CONSULTORAS.map((c) => [c.id, ""])));
 
+  // ✅ hooks dentro do componente
+  useEffect(() => {
+    carregarClientes();
+  }, []);
+
+  async function carregarClientes() {
+    try {
+      const querySnapshot = await getDocs(collection(db, "clientes"));
+      // Se quiser usar os clientes do Firebase no futuro, processe aqui
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   const cor = CONSULTORAS.find((c) => c.id === consultoraSelecionada).cor;
   const clientes = CLIENTES[consultoraSelecionada];
   const clienteData = data[consultoraSelecionada][clienteSelecionado];
@@ -92,67 +95,57 @@ export default function App() {
     setClienteSelecionado(CLIENTES[id][0]);
   };
 
- const toggleCheck = async (itemId) => {
-  const novoValor =
-    !data[consultoraSelecionada][clienteSelecionado]
-      .checklist[semanaAtiva][itemId];
+  const toggleCheck = async (itemId) => {
+    const novoValor =
+      !data[consultoraSelecionada][clienteSelecionado]
+        .checklist[semanaAtiva][itemId];
 
-  const novoData = {
-    ...data,
-    [consultoraSelecionada]: {
-      ...data[consultoraSelecionada],
-      [clienteSelecionado]: {
-        ...data[consultoraSelecionada][clienteSelecionado],
-        checklist: {
-          ...data[consultoraSelecionada][clienteSelecionado].checklist,
-          [semanaAtiva]: {
-            ...data[consultoraSelecionada][clienteSelecionado]
-              .checklist[semanaAtiva],
-            [itemId]: novoValor
-          }
-        }
+    const novoData = {
+      ...data,
+      [consultoraSelecionada]: {
+        ...data[consultoraSelecionada],
+        [clienteSelecionado]: {
+          ...data[consultoraSelecionada][clienteSelecionado],
+          checklist: {
+            ...data[consultoraSelecionada][clienteSelecionado].checklist,
+            [semanaAtiva]: {
+              ...data[consultoraSelecionada][clienteSelecionado].checklist[semanaAtiva],
+              [itemId]: novoValor,
+            },
+          },
+        },
+      },
+    };
+
+    setData(novoData);
+
+    try {
+      const querySnapshot = await getDocs(collection(db, "clientes"));
+      const documentoFirebase = querySnapshot.docs.find(
+        (docItem) => docItem.data().nome === clienteSelecionado
+      );
+      if (documentoFirebase) {
+        await updateDoc(doc(db, "clientes", documentoFirebase.id), {
+          [itemId]: novoValor,
+        });
       }
+    } catch (error) {
+      console.error(error);
     }
   };
 
-  setData(novoData);
-
-  try {
-    const querySnapshot = await getDocs(
-      collection(db, "clientes")
-    );
-
-    const documentoFirebase = querySnapshot.docs.find(
-      (docItem) =>
-        docItem.data().nome === clienteSelecionado
-    );
-
-    if (documentoFirebase) {
-      await updateDoc(
-        doc(db, "clientes", documentoFirebase.id),
-        {
-          [itemId]: novoValor
-        }
-      );
-    }
-} catch (error) {
-  console.error(error);
-}
-};
-
-const updateField = (field, value) => {
-  setData((prev) => ({
-    ...prev,
-    [consultoraSelecionada]: {
-      ...prev[consultoraSelecionada],
-      [clienteSelecionado]: {
-        ...prev[consultoraSelecionada][clienteSelecionado],
-        [field]: value,
+  const updateField = (field, value) => {
+    setData((prev) => ({
+      ...prev,
+      [consultoraSelecionada]: {
+        ...prev[consultoraSelecionada],
+        [clienteSelecionado]: {
+          ...prev[consultoraSelecionada][clienteSelecionado],
+          [field]: value,
+        },
       },
-    },
-  }));
-};
-  
+    }));
+  };
 
   const updateContato = (semIdx, value) => {
     setData((prev) => ({
@@ -189,16 +182,30 @@ const updateField = (field, value) => {
   const adicionarDuvida = (consultId) => {
     const texto = novaDuvida[consultId].trim();
     if (!texto) return;
-    setDuvidas((prev) => ({ ...prev, [consultId]: [...prev[consultId], { texto, resolvida: false, data: new Date().toLocaleDateString("pt-BR") }] }));
+    setDuvidas((prev) => ({
+      ...prev,
+      [consultId]: [
+        ...prev[consultId],
+        { texto, resolvida: false, data: new Date().toLocaleDateString("pt-BR") },
+      ],
+    }));
     setNovaDuvida((prev) => ({ ...prev, [consultId]: "" }));
   };
 
   const toggleDuvida = (consultId, idx) => {
-    setDuvidas((prev) => ({ ...prev, [consultId]: prev[consultId].map((d, i) => i === idx ? { ...d, resolvida: !d.resolvida } : d) }));
+    setDuvidas((prev) => ({
+      ...prev,
+      [consultId]: prev[consultId].map((d, i) =>
+        i === idx ? { ...d, resolvida: !d.resolvida } : d
+      ),
+    }));
   };
 
   const removerDuvida = (consultId, idx) => {
-    setDuvidas((prev) => ({ ...prev, [consultId]: prev[consultId].filter((_, i) => i !== idx) }));
+    setDuvidas((prev) => ({
+      ...prev,
+      [consultId]: prev[consultId].filter((_, i) => i !== idx),
+    }));
   };
 
   const progresso = (consultId, cliente, semIdx) => {
@@ -211,7 +218,11 @@ const updateField = (field, value) => {
   const progressoGeral = (consultId, semIdx) => {
     const clts = CLIENTES[consultId];
     const total = clts.length * CHECKLIST_ITENS.length;
-    const done = clts.reduce((acc, cl) => acc + Object.values(data[consultId][cl].checklist[semIdx]).filter(Boolean).length, 0);
+    const done = clts.reduce(
+      (acc, cl) =>
+        acc + Object.values(data[consultId][cl].checklist[semIdx]).filter(Boolean).length,
+      0
+    );
     return Math.round((done / total) * 100);
   };
 
@@ -222,7 +233,10 @@ const updateField = (field, value) => {
   const done = Object.values(checks).filter(Boolean).length;
   const pct = Math.round((done / CHECKLIST_ITENS.length) * 100);
 
-  const corTag = cor === "#6EE7B7" ? "tag-verde" : cor === "#93C5FD" ? "tag-azul" : cor === "#FCD34D" ? "tag-amarelo" : "tag-vermelha";
+  const corTag =
+    cor === "#6EE7B7" ? "tag-verde" :
+    cor === "#93C5FD" ? "tag-azul" :
+    cor === "#FCD34D" ? "tag-amarelo" : "tag-vermelha";
 
   return (
     <div style={{ minHeight: "100vh", background: "#0D0F14", color: "#E8EAF0", fontFamily: "'DM Sans', sans-serif" }}>
@@ -483,8 +497,6 @@ const updateField = (field, value) => {
                       </span>
                     )}
                   </div>
-
-                  {/* Input nova dúvida */}
                   <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
                     <input
                       className="input-sutil"
@@ -501,8 +513,6 @@ const updateField = (field, value) => {
                       + Adicionar
                     </button>
                   </div>
-
-                  {/* Lista de dúvidas */}
                   {duvidas[c.id].length === 0 ? (
                     <div style={{ fontSize: 12, color: "#3E4560", textAlign: "center", padding: "16px 0" }}>Nenhuma dúvida anotada ainda</div>
                   ) : (
