@@ -92,18 +92,53 @@ export default function App() {
     setClienteSelecionado(CLIENTES[id][0]);
   };
 
-  const toggleCheck = (itemId) => {
-    setData((prev) => ({
-      ...prev,
-      [consultoraSelecionada]: {
-        ...prev[consultoraSelecionada],
-        [clienteSelecionado]: {
-          ...prev[consultoraSelecionada][clienteSelecionado],
-          checklist: {
-            ...prev[consultoraSelecionada][clienteSelecionado].checklist,
-            [semanaAtiva]: {
-              ...prev[consultoraSelecionada][clienteSelecionado].checklist[semanaAtiva],
-              [itemId]: !prev[consultoraSelecionada][clienteSelecionado].checklist[semanaAtiva][itemId],
+ const toggleCheck = async (itemId) => {
+  const novoValor =
+    !data[consultoraSelecionada][clienteSelecionado]
+      .checklist[semanaAtiva][itemId];
+
+  const novoData = {
+    ...data,
+    [consultoraSelecionada]: {
+      ...data[consultoraSelecionada],
+      [clienteSelecionado]: {
+        ...data[consultoraSelecionada][clienteSelecionado],
+        checklist: {
+          ...data[consultoraSelecionada][clienteSelecionado].checklist,
+          [semanaAtiva]: {
+            ...data[consultoraSelecionada][clienteSelecionado]
+              .checklist[semanaAtiva],
+            [itemId]: novoValor
+          }
+        }
+      }
+    }
+  };
+
+  setData(novoData);
+
+  try {
+    const querySnapshot = await getDocs(
+      collection(db, "clientes")
+    );
+
+    const documentoFirebase = querySnapshot.docs.find(
+      (docItem) =>
+        docItem.data().nome === clienteSelecionado
+    );
+
+    if (documentoFirebase) {
+      await updateDoc(
+        doc(db, "clientes", documentoFirebase.id),
+        {
+          [itemId]: novoValor
+        }
+      );
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
             },
           },
         },
