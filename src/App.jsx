@@ -135,27 +135,24 @@ export default function App() {
         }
       );
     }
-  } catch (error) {
-    console.error(error);
-   }
+} catch (error) {
+  console.error(error);
+}
 };
-    
-      
-  
 
-
-  const updateField = (field, value) => {
-    setData((prev) => ({
-      ...prev,
-      [consultoraSelecionada]: {
-        ...prev[consultoraSelecionada],
-        [clienteSelecionado]: {
-          ...prev[consultoraSelecionada][clienteSelecionado],
-          [field]: value,
-        },
+const updateField = (field, value) => {
+  setData((prev) => ({
+    ...prev,
+    [consultoraSelecionada]: {
+      ...prev[consultoraSelecionada],
+      [clienteSelecionado]: {
+        ...prev[consultoraSelecionada][clienteSelecionado],
+        [field]: value,
       },
-    }));
-  };
+    },
+  }));
+};
+  
 
   const updateContato = (semIdx, value) => {
     setData((prev) => ({
