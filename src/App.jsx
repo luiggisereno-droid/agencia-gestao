@@ -22,7 +22,7 @@ function Avatar({ name, size = 38 }) {
   return <div style={{ width: size, height: size, borderRadius: "50%", background: color, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: size * 0.38, color: "#fff", flexShrink: 0 }}>{name[0]}</div>;
 }
 function Badge({ text, color }) {
-  return <span style={{ background: color + "22", color, border: 1px solid ${color}44, borderRadius: 6, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>{text}</span>;
+  return <span style={{ background: color + "22", color, border: `1px solid ${color}44`, borderRadius: 6, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>{text}</span>;
 }
 const inputStyle = { width: "100%", background: "#0f172a", border: "1px solid #334155", borderRadius: 8, padding: "10px 14px", color: "#e2e8f0", fontSize: 14, outline: "none", boxSizing: "border-box", fontFamily: "inherit" };
 const labelStyle = { fontSize: 11, color: "#94a3b8", fontWeight: 700, letterSpacing: 1, marginBottom: 6, display: "block", textTransform: "uppercase" };
