@@ -11,7 +11,7 @@ const avatarColors = { Bruna: "#f472b6", Vitória: "#818cf8", Joyce: "#2dd4bf", 
 const urgenciaCor = { normal: "#818cf8", urgente: "#f59e0b", critico: "#ef4444" };
 function buildInitialState(def) {
   const s = {};
-  consultores.forEach(c => CONSULTORES_CLIENTES[c].forEach(cli => { s[⁠ ${c}||${cli} ⁠] = { ...def }; }));
+  consultores.forEach(c => CONSULTORES_CLIENTES[c].forEach(cli => { s[`${c}||${cli}`] = { ...def }; }));
   return s;
 }
 const defChecklist = { produtosBanidos: "", estoque: "", ads: "", pesos: "", data: "" };
